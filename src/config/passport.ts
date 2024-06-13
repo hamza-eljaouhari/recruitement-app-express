@@ -19,20 +19,19 @@ passport.deserializeUser(async (id: number, done) => {
 passport.use(new GoogleStrategy({
   clientID: process.env.GOOGLE_CLIENT_ID!,
   clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
-  callbackURL: 'http://localhost:3000/auth/google/callback',
+  callbackURL: 'http://localhost:3000/auth/google/callback', // Ensure this matches the Google Cloud Console
 }, async (token: string, tokenSecret: string, profile: GoogleProfile, done) => {
   try {
-    const existingUser = await User.findOne({ where: { googleId: profile.id } });
-    if (existingUser) {
-      return done(null, existingUser);
+    let user = await User.findOne({ where: { googleId: profile.id } });
+    if (!user) {
+      user = await User.create({
+        googleId: profile.id,
+        name: profile.displayName,
+        email: profile.emails ? profile.emails[0].value : '',
+        type: 'candidate', // or determine based on your logic
+      });
     }
-    const newUser = await User.create({
-      googleId: profile.id,
-      name: profile.displayName,
-      email: profile.emails ? profile.emails[0].value : '',
-      type: 'candidate', // or determine based on your logic
-    });
-    done(null, newUser);
+    return done(null, user);
   } catch (err) {
     done(err, false);
   }
@@ -41,21 +40,20 @@ passport.use(new GoogleStrategy({
 passport.use(new LinkedInStrategy({
   clientID: process.env.LINKEDIN_CLIENT_ID!,
   clientSecret: process.env.LINKEDIN_CLIENT_SECRET!,
-  callbackURL: 'http://localhost:3000/auth/linkedin/callback',
+  callbackURL: 'http://localhost:3000/auth/linkedin/callback', // Ensure this matches the LinkedIn Developer Portal
   scope: ['r_emailaddress', 'r_liteprofile'],
 }, async (token: string, tokenSecret: string, profile: LinkedInProfile, done) => {
   try {
-    const existingUser = await User.findOne({ where: { linkedinId: profile.id } });
-    if (existingUser) {
-      return done(null, existingUser);
+    let user = await User.findOne({ where: { linkedinId: profile.id } });
+    if (!user) {
+      user = await User.create({
+        linkedinId: profile.id,
+        name: profile.displayName,
+        email: profile.emails ? profile.emails[0].value : '',
+        type: 'candidate', // or determine based on your logic
+      });
     }
-    const newUser = await User.create({
-      linkedinId: profile.id,
-      name: profile.displayName,
-      email: profile.emails ? profile.emails[0].value : '',
-      type: 'candidate', // or determine based on your logic
-    });
-    done(null, newUser);
+    return done(null, user);
   } catch (err) {
     done(err, false);
   }

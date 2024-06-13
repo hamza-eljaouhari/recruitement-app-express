@@ -1,5 +1,5 @@
 import { JwtPayload } from 'jsonwebtoken';
-import { UserAttributes } from '../models/user';
+import { UserAttributes } from '../src/models/user';
 
 declare global {
   namespace Express {
