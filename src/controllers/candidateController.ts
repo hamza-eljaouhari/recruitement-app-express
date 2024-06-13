@@ -1,29 +1,41 @@
 import { Request, Response } from 'express';
-import models from '../models';
-
-const { User } = models;
+import User from '../models/user';
 
 export const getProfile = async (req: Request, res: Response) => {
+  const user = req.user as User;
+
+  if (!user || !user.id) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+
   try {
-    const user = await User.findByPk(req.user?.id); // req.user is now properly typed
-    res.json({ user });
+    const foundUser = await User.findByPk(user.id);
+    if (!foundUser) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+    res.json({ user: foundUser });
   } catch (error: any) {
     res.status(500).json({ error: error.message });
   }
 };
 
 export const updateProfile = async (req: Request, res: Response) => {
+  const user = req.user as User;
+
+  if (!user || !user.id) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+
   try {
     const { name, email } = req.body;
-    const user = await User.findByPk(req.user?.id); // req.user is now properly typed
-    if (user) {
-      user.name = name || user.name;
-      user.email = email || user.email;
-      await user.save();
-      res.json({ user });
-    } else {
-      res.status(404).json({ error: 'User not found' });
+    const foundUser = await User.findByPk(user.id);
+    if (!foundUser) {
+      return res.status(404).json({ error: 'User not found' });
     }
+    foundUser.name = name || foundUser.name;
+    foundUser.email = email || foundUser.email;
+    await foundUser.save();
+    res.json({ user: foundUser });
   } catch (error: any) {
     res.status(500).json({ error: error.message });
   }

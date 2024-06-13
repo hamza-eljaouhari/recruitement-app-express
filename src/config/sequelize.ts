@@ -21,7 +21,7 @@ const sequelize = new Sequelize(
   {
     host: MYSQL_HOST!,
     dialect: 'mysql',
-    logging: true,
+    logging: console.log,
   }
 );
 
