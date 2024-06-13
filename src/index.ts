@@ -1,4 +1,6 @@
 import express from 'express';
+import session from 'express-session';
+import passport from './config/passport'; // Adjust the path as needed
 import dotenv from 'dotenv';
 import cors from 'cors';
 import authRoutes from './routes/authRoutes';
@@ -13,6 +15,18 @@ const port = process.env.PORT || 3000;
 
 // Use CORS middleware
 app.use(cors());
+
+// Use express-session middleware
+app.use(session({
+  secret: process.env.SESSION_SECRET || 'default_secret',
+  resave: false,
+  saveUninitialized: true,
+  cookie: { secure: false } // Set to true if using HTTPS
+}));
+
+// Initialize Passport and restore authentication state, if any, from the session
+app.use(passport.initialize());
+app.use(passport.session());
 
 app.use(express.json());
 
